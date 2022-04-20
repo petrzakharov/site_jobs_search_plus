@@ -14,7 +14,7 @@ def custom_handler500(request): # нужен ли хендлер если исп
 
 
 class Index(TemplateView):  # от чего наследуем?
-    template_name = 'myapp/index.html'
+    template_name = 'myapp/index_temp.html'
 
     def get_context_data(self, **kwargs):
         pass
@@ -22,16 +22,16 @@ class Index(TemplateView):  # от чего наследуем?
 
 class VacanciesList(ListView):
     model = models.Vacancy
-    template_name = 'myapp/vacancies_list.html'
+    template_name = 'myapp/vacancies_temp.html'
 
 
 class VacanciesBySpecialty(TemplateView): # от чего наследуем?
-    template_name = 'myapp/vacancies_by_specialty.html'
+    template_name = 'myapp/vacancies_temp.html'
 
 
-class Vacancy(DetailView):
-    model = models.Vacancy
-    template_name = 'myapp/vacancy.html'
+class Vacancy(TemplateView):
+   # model = models.Vacancy
+    template_name = 'myapp/vacancy_temp.html'
 
 
 class Company(DetailView):
