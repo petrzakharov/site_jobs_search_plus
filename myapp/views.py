@@ -29,11 +29,11 @@ class VacanciesBySpecialty(TemplateView): # от чего наследуем?
     template_name = 'myapp/vacancies_temp.html'
 
 
-class Vacancy(TemplateView):
-   # model = models.Vacancy
+class Vacancy(DetailView):
+    model = models.Vacancy
     template_name = 'myapp/vacancy_temp.html'
 
 
-class Company(DetailView):
-    model = models.Company
-    template_name = 'myapp/company.html'
+class Company(TemplateView):
+    #model = models.Company
+    template_name = 'myapp/company_temp.html'
