@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
-
 {% block content %}
-
   <main class="container mt-3 pb-5">
     <div class="row mt-5">
       <div class="col-12 col-lg-2">
@@ -13,46 +11,15 @@
         <section class="pl-3">
           <a href="#"><img src="https://place-hold.it/130x80" width="130" height="80" alt=""></a>
           <div class="d-flex align-items-baseline align-content-baseline">
-            <h1 class="h2 mt-4 font-weight-bold" >Backend-разработчик</h1>
-            <p class="m-0 pl-3">120 000 – 220 000 Р</p>
+            <h1 class="h2 mt-4 font-weight-bold" >{{ vacancy.title }}</h1>
+            <p class="m-0 pl-3">{{ vacancy.salary_min }} - {{ vacancy.salary_max }} Р </p>
           </div>
-          <p class="mt-2">Бэкенд • Средний (Middle) • PHP • PostgreSQL • MySQL • Node.js • Laravel • Symfony • Yii framework • Sails.js • Rabbitmq • Kafka</p>
-          <p class="text-muted mb-4">Primal Assault (15-30 человек), Рязань или удаленно</p>
+          <p class="mt-2">{{ vacancy.skills }}</p>
+          <p class="text-muted mb-4">{{ vacancy.company.name|title }} ({{ vacancy.company.employee_count }} человек), {{ vacancy.company.location }}</p>
           <div style="line-height: 1.8;">
-            <p>Финтех компаниявходит в международную группу  и занимается развитием факторингового бизнеса. В связи с расширением штата, мы хотим усилить нашу команду Backend-разработчиком, для работы над улучшением продуктов компании.</p>
-            <p><b>Мы предлагаем: </b><br>
-              Оформление по ТК РФ<br>
-              ДМС со стоматологией<br>
-              Достойную зарплату, уровень которой можно обсудить по телефону с рекрутером<br>
-              Гибкое начало дня, отдельные дни удаленной работы обсуждаются<br>
-              Современный офис<br>
-              Демократичную корпоративную культуру<br>
-              Работу в команде по Scrum
-            </p>
-            <p><b>Какая работа тебя ждет: </b><br>
-              Написание бизнес-логики по ТЗ от аналитиков<br>
-              Вынесение общий логики в базовые сервисы<br>
-              Интеграция с внешними системами, рефкторинг.
-            </p>
-            <p><b>Кого мы ищем: </b><br>
-              Опытного разработчика на C# (от 3х лет)<br>
-              Хорошие знания: ASP.Net MVC, EF CodeFirst, MS SQL, AutoFac (или другой IoC), RabbitMq <br>
-              Навыки проектирования и рефакторинга доменной модели <br>
-              git, gitflow, bitBucket, youTrack (или альтернативы)
-            </p>
-            <p><b>Будет отлично, если ты:</b><br>
-              Имеешь опыт работы с ЭДО, электронными подписями<br>
-              Kendo UI, SignalR, Vue.js, Azure Service Fabric, Team City, Octopus Deploy<br>
-              Опыт в CQRS, Event Sourcing, построение приложений на NServiceBus/MassTransit<br>
-              Опыт работы в команде по Scrum
-            </p>
+            {{ vacancy.description|safe}}
           </div>
-
-
             {% include 'includes/form.html' %}  
-
-
-
         </section>
       </div>
     </div>

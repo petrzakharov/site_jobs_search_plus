@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView
@@ -13,35 +14,63 @@ def custom_handler500(request):  # Проверить, отрабатывает 
     return HttpResponseServerError('<h1>Произошла ошибка на сервере, упс!</h1>')
 
 
-class Index(TemplateView):  # от чего наследуем?
+# во всех вьюхи добавить кнопки назад и меню (подумать как лучше)
+
+class Index(TemplateView):  
+    # проверить количество запросов с помощью джанго тулбар
     template_name = 'myapp/index_temp.html'
 
     def get_context_data(self, **kwargs):
-        pass
-        # К Specialty модели добавить annotat'ом количество вакансий
-        # К Company добавить annotate количество вакансий, с помощью values убрать ненужные поля
+        context = super().get_context_data(**kwargs)
+        context['vacancies'] = models.Vacancy.objects.values(
+            'specialty__title', 'specialty__code').annotate(count=Count('id')
+        )
+        context['companies'] = models.Company.objects.values(
+            'logo', 'id').annotate(count=Count('vacancies'))
+        return context
 
 
 class VacanciesList(ListView):
     model = models.Vacancy
     template_name = 'myapp/vacancies_temp.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['all_vacancie'] = True
+        return context
+    # заменить запятые точками в шаблоне, написать кастомный фильтр
+    # добавить разделение разрядов в зарплате
+    # русифицировать формат даты "11 марта"
+
 
 class VacanciesBySpecialty(ListView):
     template_name = 'myapp/vacancies_temp.html'
-    # Переопределить get_queryset() в котором взять из юрл название специальности и по нему отфильтровать кверисет
-    # Использовать get_list_or_404() для ситуации когда передана несуществующая специализация удовлетворяющая нашему пути
+    allow_empty = False
+
+    def get_queryset(self):
+        return models.Vacancy.objects.filter(specialty__code=self.kwargs['specialty'])
 
 
 class Vacancy(DetailView):
     model = models.Vacancy
     template_name = 'myapp/vacancy_temp.html'
-    # Использовать get_object_or_404
+    pk_url_kwarg = 'vacancy_id'
+    context_object_name = 'vacancy'
+    # Возможно имеет смысл сделать select related с Company
+    # добавить разделение разрядов в зарплате
+    # заменить запятые точками в шаблоне, написать кастомный фильтр
 
 
 class Company(ListView):
     model = models.Vacancy
     template_name = 'myapp/company_temp.html'
-    # Переопределить get_queryset(), взять из юрл название компании и отфильровать по нему таблицу вакансий
-    # Переопределить get_context_data() добавить данные о компании, сделать count() вакансий
-    # # Использовать get_object_or_404 когда передана несуществующее название компании в модели
+    pk_url_kwarg = 'company_id'
+
+    def get_queryset(self):
+        return models.Vacancy.objects.filter(company__id=self.kwargs['company_id'])
+    # добавить разделение разрядов в зарплате
+    # заменить запятые точками в шаблоне, написать кастомный фильтр
+    # русифицировать формат даты "11 марта"
+    # вызывать 404 не при пустом списке, а если такой компании нет в бд
+    # добавить в контекст get_object_or_404 + данные о компании (решит предыдущий вопрос)
+    

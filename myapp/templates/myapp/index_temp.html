@@ -11,7 +11,17 @@
     <h2 class="h2 font-weight-normal text-center mb-5">Вакансии по рубрикам</h2>
         <div class="row mb-0">
 
-        <!-- Карточки специальностей -->
+               {% for vacancy in vacancies %}    
+            <div class="col-6 col-md-6 col-lg-3">
+          <div class="card pt-4 text-center mb-4">
+            <img class="mx-auto d-block" src="https://place-hold.it/80x80" width="80" height="80" alt="">
+            <div class="card-body">
+              <p class="card-text mb-2">{{ vacancy.specialty__title }}</p>
+              <p class="card-text"><a href="{% url "specialty" vacancy.specialty__code %}">{{ vacancy.count }} вакансий</a></p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
 
         </div>
 </section>
@@ -21,7 +31,29 @@
     <h2 class="h2 font-weight-normal text-center mb-5">Нам доверяют лучшие компании</h2>
         <div class="row mb-0">
 
-        <!-- Карточки по компаниям -->
+        
+
+        {% for company in companies %} 
+
+            <div class="col-6 col-md-6 col-lg-3">
+          <div class="card pt-5 text-center mb-4">
+            <a href="#" style="max-width: 150px;" class="mx-auto d-block">
+              <img class="mx-auto d-block m-100" src="../static/{{ company.logo }}" width="150" alt="">
+            </a>
+            <div class="card-body">
+              <p class="card-text"><a href="{% url "company" company.id %}">{{ company.count }}</a></p>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %} 
+
+
+
+
+
+
+
 
         </div>
 </section>

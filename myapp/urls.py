@@ -5,12 +5,12 @@ from . import views
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
     path(
-        'vacancies',
+        'vacancies/',
         views.VacanciesList.as_view(),
         name='vacancies_list'
     ),
     path(
-        'vacancies/cat/<str:frontend>/',
+        'vacancies/cat/<str:specialty>/',
         views.VacanciesBySpecialty.as_view(),
         name='specialty'
     ),

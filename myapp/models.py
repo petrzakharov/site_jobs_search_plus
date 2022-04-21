@@ -33,7 +33,7 @@ class Vacancy(models.Model):
     salary_max = models.PositiveIntegerField(blank=False)
     published_at = models.DateField(auto_now_add=True)
 
-    def clean(self): # Проверить работу
+    def clean(self):
         if self.salary_min > self.salary_max:
             raise ValidationError(
                 'Ошибка в границах зарплатной вилки'
