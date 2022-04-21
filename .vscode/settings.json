@@ -2,9 +2,6 @@
     "editor.rulers": [
         80
     ],
-    "workbench.colorCustomizations": {
-        "editorRuler.foreground": "#484a48"
-    },
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "python.linting.flake8Path": "env/bin/flake8",

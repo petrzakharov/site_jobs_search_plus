@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -30,4 +31,10 @@ class Vacancy(models.Model):
     description = models.TextField(max_length=1000)
     salary_min = models.PositiveIntegerField(blank=False)
     salary_max = models.PositiveIntegerField(blank=False)
-    published_at = models.DateTimeField(auto_now_add=True)
+    published_at = models.DateField(auto_now_add=True)
+
+    def clean(self): # Проверить работу
+        if self.salary_min > self.salary_max:
+            raise ValidationError(
+                'Ошибка в границах зарплатной вилки'
+            )

@@ -5,7 +5,7 @@ from django.views.generic.base import TemplateView
 from . import models
 
 
-def custom_handler404(request, exception): # Проверить, отрабатывает ли этот хендлер с классами
+def custom_handler404(request, exception):  # Проверить, отрабатывает ли этот хендлер с классами
     return HttpResponseNotFound('<h1>Страница не найдена, упс!</h1>')
 
 
@@ -36,7 +36,7 @@ class VacanciesBySpecialty(ListView):
 class Vacancy(DetailView):
     model = models.Vacancy
     template_name = 'myapp/vacancy_temp.html'
-    # Использовать get_object_or_404 
+    # Использовать get_object_or_404
 
 
 class Company(ListView):
