@@ -49,9 +49,6 @@ class Vacancy(DetailView):
 
 
 class Company(ListView):
-
-    # Как можно оптимизировать эту вьюху, чтобы сделать меньше запросов?
-
     model = models.Vacancy
     template_name = 'myapp/company.html'
     pk_url_kwarg = 'company_id'
