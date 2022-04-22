@@ -1,0 +1,36 @@
+{% extends 'base.html' %} {% block content %}{% load humanize %}
+<main class="container mt-3 pb-5">
+  <div class="row mt-5">
+    <div class="col-12 col-lg-2">
+      <div class="pl-3 mb-5">
+        <p><a href="#">Назад</a></p>
+      </div>
+    </div>
+    <div class="col-12 col-lg-8">
+      <section class="pl-3">
+        <a href="{% url "company" vacancy.company.id %}"
+          ><img
+            src="../static/logos/{{ vacancy.company.logo }}"
+            width="130"
+            height="80"
+            alt=""
+        /></a>
+        <div class="d-flex align-items-baseline align-content-baseline">
+          <h1 class="h2 mt-4 font-weight-bold">{{ vacancy.title }}</h1>
+          <p class="m-0 pl-3">
+            {{ vacancy.salary_min|intcomma }} - {{ vacancy.salary_max|intcomma }} Р
+          </p>
+        </div>
+        <p class="mt-2">{{ vacancy.skills }}</p>
+        <p class="text-muted mb-4">
+          {{ vacancy.company.name|title }} ({{ vacancy.company.employee_count }}
+          человек), {{ vacancy.company.location }}
+        </p>
+        <div style="line-height: 1.8">{{ vacancy.description|safe}}</div>
+        {% include 'includes/form.html' %}
+      </section>
+    </div>
+  </div>
+</main>
+
+{% endblock %}

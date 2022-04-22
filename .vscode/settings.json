@@ -2,6 +2,7 @@
     "editor.rulers": [
         80
     ],
+    "html.suggest.html5": true,
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "python.linting.flake8Path": "env/bin/flake8",
@@ -18,4 +19,6 @@
     "editor.fontLigatures": true,
     "editor.letterSpacing": 0.4,
     "editor.smoothScrolling": true,
+
+    
 }

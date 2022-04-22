@@ -1,5 +1,6 @@
 import pandas as pd
 from django.core.management.base import BaseCommand
+
 from myapp.models import Company, Specialty, Vacancy
 
 from .data import companies, jobs, specialties
@@ -45,6 +46,7 @@ class Command(BaseCommand):
     """
     Загрузка данных в модели
     """
+
     def handle(self, *args, **options):
         for model, loads_elements in MAPPING_MODEL_ELEMENTS.items():
             for row in change_types(loads_elements, model):
