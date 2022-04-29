@@ -19,6 +19,5 @@
     "editor.fontLigatures": true,
     "editor.letterSpacing": 0.4,
     "editor.smoothScrolling": true,
-
-    
+    "python.formatting.provider": "black",
 }
