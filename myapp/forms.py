@@ -41,3 +41,18 @@ class VacancyForm(forms.ModelForm):
             "skills": "Требуемые навыки",
             "description": "Описание вакансии",
         }
+
+
+class ApplicationForm(forms.ModelForm):
+    class Meta:
+        model = models.Application
+        fields = (
+            "written_username",
+            "written_phone",
+            "written_cover_letter",
+        )
+        labels = {
+            "written_username": "Вас зовут",
+            "written_phone": "Ваш телефон",
+            "written_cover_letter": "Сопроводительное письмо",
+        }

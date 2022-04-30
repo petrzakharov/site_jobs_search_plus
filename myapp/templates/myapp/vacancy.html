@@ -31,6 +31,12 @@
       </section>
     </div>
   </div>
+
+
+   <form method="post" enctype="multipart/form-data">{% csrf_token %}
+              <table>{{ form.as_table }}</table>
+              <button type="submit">Submit</button>
+            </form>
 </main>
 
 {% endblock %}

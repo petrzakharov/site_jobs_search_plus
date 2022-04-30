@@ -1,5 +1,6 @@
 from calendar import c
 
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,7 +10,7 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView
 
 from . import models
-from .forms import CompanyForm, VacancyForm
+from .forms import ApplicationForm, CompanyForm, VacancyForm
 
 
 class Index(TemplateView):
@@ -49,15 +50,42 @@ class VacanciesBySpecialty(ListView):
         ).select_related("company")
 
 
-class Vacancy(DetailView):
-    model = models.Vacancy
-    template_name = "myapp/vacancy.html"
-    pk_url_kwarg = "vacancy_id"
-    context_object_name = "vacancy"
+# class Vacancy(DetailView):
+#     model = models.Vacancy
+#     template_name = "myapp/vacancy.html"
+#     pk_url_kwarg = "vacancy_id"
+#     context_object_name = "vacancy"
 
-    # тут добавить форму отклика, если пришел post запрос то ...
-    # переписать на get / post запросах
-    # при post запросе создаем связь в таблице откликов и переадресуем в VacancySend
+# тут добавить форму отклика, если пришел post запрос то ...
+# переписать на get / post запросах
+# при post запросе создаем связь в таблице откликов и переадресуем в VacancySend
+
+
+class Vacancy(View):
+    # в post нужно вызвать ошибку если юзер anonim !!!
+    # вернуть 404 ошибку если страница не существует (вакансия)
+    # Как сделать, чтобы UniqueConstraint возвращало человеческую ошибку? Если выключить debug true, то? Проверить.
+
+    def get(self, request, vacancy_id):
+        form = ApplicationForm()
+        vacancy = models.Vacancy.objects.get(id=vacancy_id)
+        context = {"form": form, "vacancy": vacancy}
+        return render(request, "myapp/vacancy.html", context)
+
+    def post(self, request, *args, **kwargs):
+        # тут нужно вызвать ошибку если юзер anonim
+        form = ApplicationForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.user = request.user
+            instance.vacancy = models.Vacancy.objects.get(id=self.kwargs["vacancy_id"])
+            instance.save()
+            return redirect(
+                reverse_lazy(
+                    "vacancy_send", kwargs={"vacancy_id": self.kwargs["vacancy_id"]}
+                )
+            )
+        return render(request, "sent.html", {"form": form})
 
 
 class Company(ListView):
@@ -86,9 +114,15 @@ class Company(ListView):
 # MyCompanyVacancy
 
 
-class MyComapanyStart(View):
-    # только для залогиненого пользователя
+# Проверку наличия компании можно попробовать реализовать через
+# UserPassesTestMixin
+
+
+class MyComapanyStart(LoginRequiredMixin, View):
+    login_url = "/login/"
     # у пользователя должна не должно быть компании
+    # наполить словарь контекста для шаблона
+
     def get(self, request, *args, **kwargs):
         company_qs = models.Company.objects.filter(owner=request.user)
         if company_qs.exists():
@@ -96,9 +130,12 @@ class MyComapanyStart(View):
         return render(request, "company-create.html", context={})
 
 
-class MyComapanyCreate(View):
-    # только для залогиненого пользователя
+class MyComapanyCreate(LoginRequiredMixin, View):
+
+    login_url = "/login/"
     # у пользователя должна не должно быть компании
+    # наполить словарь контекста для шаблона
+
     def get(self, request):
         if models.Company.objects.filter(owner=request.user).exists():
             return redirect(reverse_lazy("my_company"))
@@ -117,9 +154,11 @@ class MyComapanyCreate(View):
         return render(request, "company-edit.html", {"form": form})
 
 
-class MyCompany(View):
-    # только для залогиненого пользователя
+class MyCompany(LoginRequiredMixin, View):
+    login_url = "/login/"
     # у пользователя должна быть компания
+    # наполить словарь контекста для шаблона
+
     def get(self, request):
         # Мне нужен id company
         company_qs = models.Company.objects.filter(owner=request.user)
@@ -143,9 +182,10 @@ class MyCompany(View):
         return render(request, "company-edit.html", context)
 
 
-class MyCompanyVacanciesList(View):
-    # только для залогиненого пользователя
+class MyCompanyVacanciesList(LoginRequiredMixin, View):
+    login_url = "/login/"
     # у пользователя должна быть компания
+    # наполить словарь контекста для шаблона
     def get(self, request):
         company_qs = models.Company.objects.filter(owner=request.user)
         if not company_qs.exists():
@@ -161,9 +201,11 @@ class VacancySend(View):
         return render(request, "sent.html", {"vacancy_id": vacancy_id})
 
 
-class MyComapnyVacanciesCreate(View):
-    # только для залогиненого пользователя
+class MyComapnyVacanciesCreate(LoginRequiredMixin, View):
+    login_url = "/login/"
     # у пользователя должна быть компания
+    # наполить словарь контекста для шаблона
+
     def get(self, request):
         company_qs = models.Company.objects.filter(owner=request.user)
         if not company_qs.exists():
@@ -184,11 +226,14 @@ class MyComapnyVacanciesCreate(View):
         return render(request, "vacancy-edit.html", {"form": form})
 
 
-class MyCompanyVacancy(View):
-    # только для залогиненого пользователя
+class MyCompanyVacancy(LoginRequiredMixin, View):
+    login_url = "/login/"
     # у пользователя должна быть компания
     # пользователь должен отправлять запрос к вакансии своей компании
+    # наполить словарь контекста для шаблона
+
     def get(self, request, vacancy_id):
+        # проверка что есть компания
         vacancy = get_object_or_404(models.Vacancy, id=vacancy_id)
         if request.user != vacancy.company.owner:
             return HttpResponse(status=403)
