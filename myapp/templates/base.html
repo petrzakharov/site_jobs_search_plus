@@ -2,7 +2,7 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>Джуманджи</title>
+    <title>{% block title %}Джуманджи{% endblock %}</title>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no"
@@ -39,14 +39,31 @@
               <a class="nav-link" href="{% url "vacancies_list" %}">Вакансии</a>
             </li>
           </ul>
+
           <ul class="navbar-nav col-2 justify-content-end">
-            <li class="nav-item active">
-              <a href="#" class="nav-link font-weight-bold">Вход</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </header>
+          <li class="nav-item active">
+            {% if user.is_authenticated %}
+            <div class="btn-group">
+              <button type="button" class="btn dropdown-toggle font-weight-bold" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ user.get_username }}
+              </button>
+              <div class="dropdown-menu dropdown-menu-right mt-3">
+
+                <!--- Тут добавить резюме если делаю сложный вариант -->
+            
+                <a href="#" class="dropdown-item py-2">Резюме</a>
+                <a href="{% url "my_company" %}" class="dropdown-item py-2">Компания</a>
+                <a href="{% url "logout" %}" class="dropdown-item py-2">Выйти</a>
+              </div>
+            </div>
+            {% else %}
+              <a href="{% url "login" %}" class="nav-link font-weight-bold">Вход</a>
+          </li>
+        </ul>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
 
     {% block content %}<!-- Контент -->{% endblock %}
 

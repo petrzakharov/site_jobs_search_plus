@@ -1,4 +1,7 @@
-{% extends 'base.html' %} {% block content %}{% load humanize %}
+{% extends 'base.html' %} 
+{% block title %} Вакансия | Джуманджи{% endblock %}
+{% block content %}{% load humanize %}
+{% load crispy_forms_tags %}
 <main class="container mt-3 pb-5">
   <div class="row mt-5">
     <div class="col-12 col-lg-2">
@@ -10,7 +13,7 @@
       <section class="pl-3">
         <a href="{% url "company" vacancy.company.id %}"
           ><img
-            src="../static/logos/{{ vacancy.company.logo }}"
+            src="../static/{{ vacancy.company.logo }}"
             width="130"
             height="80"
             alt=""
@@ -27,16 +30,14 @@
           человек), {{ vacancy.company.location }}
         </p>
         <div style="line-height: 1.8">{{ vacancy.description|safe}}</div>
-        {% include 'includes/form.html' %}
       </section>
     </div>
   </div>
-
-
-   <form method="post" enctype="multipart/form-data">{% csrf_token %}
-              <table>{{ form.as_table }}</table>
-              <button type="submit">Submit</button>
-            </form>
+  <div class="card mt-4 mb-4">
+  <div class="card-body mx-4"> 
+<p class="h5 mt-3 font-weight-normal">Отозваться на вакансию</p>
+    {% crispy form %}
+  </div>
+  </div> 
 </main>
-
 {% endblock %}

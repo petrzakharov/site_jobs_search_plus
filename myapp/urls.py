@@ -17,18 +17,20 @@ urlpatterns = [
         views.VacancySend.as_view(),
         name="vacancy_send",  # сюда приходит post запрос со страницы вакансии с откликом
         # просто создаем связь в двух моделях и рисуем что-то в шаблоне?
-        # 
+        #
     ),
     path(
         "mycompany/",
         views.MyCompany.as_view(),
         name="my_company"
         # Если компания есть рендерит шаблон company_edit, если нет переадресует на шаблон company_create
+        # context ok
     ),
     path(
         "mycompany/letsstart/",
         views.MyComapanyStart.as_view(),
         name="my_company_start",
+        # context ok
     ),
     path(
         "mycompany/create/",
@@ -36,12 +38,14 @@ urlpatterns = [
         name="my_company_create",  # Моя компания (пустая форма)
         # проверяем что у юзера нет компании, если есть переадресуем на mycompany,
         # если нет то возвраещем пустую форму
+        # context ok
     ),
     path(
         "mycompany/vacancies/",
         views.MyCompanyVacanciesList.as_view(),
         name="my_company_vacancies_list",  # Мои вакансии (список)
         # обычная вьюха, возвращаем все вакансии по моей компании
+        # добавить в context количество откликов через annotate
     ),
     path(
         "mycompany/vacancies/create/",
@@ -54,6 +58,8 @@ urlpatterns = [
         views.MyCompanyVacancy.as_view(),
         name="my_company_vacancy",  # Одна моя вакансия (заполненная форма)
         # принимает post запрос с /mycompany/vacancies/create/
+        # добавить в context количество откликов через annotate
+        # вывести отклики
     ),
     ##### вторая часть
     # path(

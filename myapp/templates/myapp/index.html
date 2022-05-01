@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block title %} Главная | Джуманджи{% endblock %}
 {% block content %}
 <main class="container mt-3">
 {% include 'includes/search_section.html' with skills=top_5_skills %}
@@ -8,7 +9,7 @@
                {% for specialty in specialties %}    
             <div class="col-6 col-md-6 col-lg-3">
           <div class="card pt-4 text-center mb-4">
-            <img class="mx-auto d-block" src="../static/specialties/specty_{{ specialty.code }}.png" width="80" height="80" alt="">
+            <img class="mx-auto d-block" src="{{ specialty.picture }}" width="80" height="80" alt="">
             <div class="card-body">
               <p class="card-text mb-2">{{ specialty.title }}</p>
               <p class="card-text"><a href="{% url "specialty" specialty.code %}">{{ specialty.count }} вакансий</a></p>
@@ -24,8 +25,8 @@
         {% for company in companies %} 
             <div class="col-6 col-md-6 col-lg-3">
           <div class="card pt-5 text-center mb-4">
-            <a href="#" style="max-width: 150px;" class="mx-auto d-block">
-              <img class="mx-auto d-block m-100" src="../static/logos/{{ company.logo }}" width="150" alt="">
+            <a href="{% url "company" company.id %}" style="max-width: 150px;" class="mx-auto d-block">
+              <img class="mx-auto d-block m-100" src="{{ company.logo }}" width="150" alt="">
             </a>
             <div class="card-body">
               <p class="card-text"><a href="{% url "company" company.id %}">{{ company.count }}</a></p>

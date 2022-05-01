@@ -115,19 +115,19 @@ class Company(ListView):
 
 
 # Проверку наличия компании можно попробовать реализовать через
-# UserPassesTestMixin
+# Написать 2 своих миксина на основе PermissionRequiredMixin - что компания есть и что компании нет
 
 
 class MyComapanyStart(LoginRequiredMixin, View):
     login_url = "/login/"
-    # у пользователя должна не должно быть компании
+    # у пользователя не должно быть компании
     # наполить словарь контекста для шаблона
 
     def get(self, request, *args, **kwargs):
         company_qs = models.Company.objects.filter(owner=request.user)
         if company_qs.exists():
             return redirect(reverse_lazy("my_company"))
-        return render(request, "company-create.html", context={})
+        return render(request, "myapp/company-create.html", context={})
 
 
 class MyComapanyCreate(LoginRequiredMixin, View):
@@ -141,7 +141,7 @@ class MyComapanyCreate(LoginRequiredMixin, View):
             return redirect(reverse_lazy("my_company"))
         form = CompanyForm()
         context = {"form": form}
-        return render(request, "company-edit.html", context)
+        return render(request, "myapp/company-edit.html", context)
 
     def post(self, request):
         form = CompanyForm(request.POST, request.FILES)
@@ -150,8 +150,8 @@ class MyComapanyCreate(LoginRequiredMixin, View):
             instance.owner = request.user
             instance.save()
             return redirect(reverse_lazy("my_company"))
-        # context = {} добавить все необходимое в контекст
-        return render(request, "company-edit.html", {"form": form})
+        context = {"form": form}
+        return render(request, "myapp/company-edit.html", context)
 
 
 class MyCompany(LoginRequiredMixin, View):
@@ -166,7 +166,7 @@ class MyCompany(LoginRequiredMixin, View):
             return redirect(reverse_lazy("my_company_start"))
         form = CompanyForm(instance=company_qs.first())
         context = {"form": form}
-        return render(request, "company-edit.html", context)
+        return render(request, "myapp/company-edit.html", context)
 
     def post(self, request):
         company = models.Company.objects.filter(owner=request.user).first()
@@ -179,7 +179,7 @@ class MyCompany(LoginRequiredMixin, View):
             context["status"] = "Информация о компании обновлена"
         else:
             context["status"] = "Обновления не сохранены. Исправьте ошибки"
-        return render(request, "company-edit.html", context)
+        return render(request, "myapp/company-edit.html", context)
 
 
 class MyCompanyVacanciesList(LoginRequiredMixin, View):
@@ -193,12 +193,14 @@ class MyCompanyVacanciesList(LoginRequiredMixin, View):
         company = company_qs[0]
         # тут оптимизировать формирование контекста
         context = {"vacancies": company.vacancies.all()}
-        return render(request, "vacancy-list.html", context)
+        return render(request, "myapp/vacancy-list.html", context)
 
 
 class VacancySend(View):
     def get(self, request, vacancy_id):
-        return render(request, "sent.html", {"vacancy_id": vacancy_id})
+        return render(request, "myapp/sent.html", {"vacancy_id": vacancy_id})
+
+    # шаблон доделать
 
 
 class MyComapnyVacanciesCreate(LoginRequiredMixin, View):
@@ -211,7 +213,8 @@ class MyComapnyVacanciesCreate(LoginRequiredMixin, View):
         if not company_qs.exists():
             return redirect(reverse_lazy("my_company_start"))
         form = VacancyForm()
-        return render(request, "vacancy-edit.html", {"form": form})
+        context = {"form": form}
+        return render(request, "myapp/vacancy-edit.html", context)
 
     def post(self, request):
         form = VacancyForm(request.POST)
@@ -222,8 +225,8 @@ class MyComapnyVacanciesCreate(LoginRequiredMixin, View):
             return redirect(
                 reverse_lazy("my_company_vacancy", kwargs={"vacancy_id": instance.id})
             )
-        # context = {"context": context}
-        return render(request, "vacancy-edit.html", {"form": form})
+        context = {"form": form, "status": "Исправьте ошибки в форме"}
+        return render(request, "myapp/vacancy-edit.html", context)
 
 
 class MyCompanyVacancy(LoginRequiredMixin, View):
@@ -239,14 +242,15 @@ class MyCompanyVacancy(LoginRequiredMixin, View):
             return HttpResponse(status=403)
         # context = {} тут добавить отклики
         form = VacancyForm(instance=vacancy)
-        return render(request, "vacancy-edit.html", {"form": form})
+        context = {"form": form, "vacancy": vacancy}
+        return render(request, "myapp/vacancy-edit.html", context)
 
     def post(self, request, vacancy_id):
         vacancy = get_object_or_404(models.Vacancy, id=vacancy_id)
         if request.user != vacancy.company.owner:
             return HttpResponse(status=403)
         form = VacancyForm(request.POST, instance=vacancy)
-        context = {"form": form}
+        context = {"form": form, "vacancy": vacancy}
         # добавить в контекст отклики на форму
         if form.is_valid():
             instance = form.save(commit=False)
@@ -255,4 +259,4 @@ class MyCompanyVacancy(LoginRequiredMixin, View):
             context["status"] = "Вакансия обновлена"
         else:
             context["status"] = "Обновления не сохранены. Исправьте ошибки"
-        return render(request, "vacancy-edit.html", context)
+        return render(request, "myapp/vacancy-edit.html", context)

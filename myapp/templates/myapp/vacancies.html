@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
 {% load replace_commas %}
 {% load humanize %}
@@ -14,23 +15,23 @@
 <p class="text-center pt-1">{{ object_list.count }} вакансий</p>
 <div class="row mt-5">
 <div class="col-12 col-lg-8 offset-lg-2 m-auto">
-        {% for vacancy in object_list %}
-            <div class="card mb-4">
-            <div class="card-body px-4">
-              <div class="row">
-                <div class="col-12 col-md-8 col-lg-9">
-                  <h2 class="h2 pb-2">{{ vacancy.title }}</h2>
-                  <p class="mb-2">{{ vacancy.skills|replace_commas|safe }}</p>
-                  <p>От {{ vacancy.salary_min|intcomma }} до {{ vacancy.salary_max|intcomma }} Р</p>
-                  <p class="text-muted pt-1">{{ vacancy.published_at|date:"d F" }} </p>
-                </div>
-                <div class="col-12 col-md-4 col-lg-3 d-flex align-items-end">
-                  <a href="{% url "vacancy" vacancy.id%}"><img src="/../static/logos/{{ vacancy.company.logo }}" width="130" height="80" alt=""></a>
-                </div>
-              </div>
-            </div>
-          </div>
-        {% endfor %}
+{% for vacancy in object_list %}
+    <div class="card mb-4">
+    <div class="card-body px-4">
+      <div class="row">
+        <div class="col-12 col-md-8 col-lg-9">
+          <h2 class="h2 pb-2">{{ vacancy.title }}</h2>
+          <p class="mb-2">{{ vacancy.skills|replace_commas|safe }}</p>
+          <p>От {{ vacancy.salary_min|intcomma }} до {{ vacancy.salary_max|intcomma }} Р</p>
+          <p class="text-muted pt-1">{{ vacancy.published_at|date:"d F" }} </p>
+        </div>
+        <div class="col-12 col-md-4 col-lg-3 d-flex align-items-end">
+          <a href="{% url "vacancy" vacancy.id%}"><img src="../static/{{ vacancy.company.logo }}" width="130" height="80" alt=""></a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}
 </div>
 </div>
 </section>

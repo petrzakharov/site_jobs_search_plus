@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Вакансии компании | Джуманджи{% endblock %}
+{% block content %}
+ <style>
+    body {
+      background-color: #F6F2E6;
+    }
+  </style>
+  <main class="container mt-3 pb-5">
+    <div class="row mt-5">
+      <div class="col-12 col-lg-4">
+        <aside class="pt-3 pb-4 px-4 mb-5 card">
+          <h1 class="h4 pt-2 pb-2">Моя компания</h1>
+          <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <a class="nav-link" href="{%url "my_company" %}">1. Информация о&nbsp;компании</a>
+            <a class="nav-link active" href="{% url "my_company_vacancies_list" %}">2. Вакансии</a>
+          </div>
+        </aside>
+      </div>
+      <div class="col-12 col-lg-8">
+        <div class="card">
+          <div class="card-body px-4 pb-4">
+            <section class="tab-pane fade show active">
+              <h2 class="h4 pt-2 pb-3">Вакансии</h2>
+              {% if vacancies %}
+              {% for vacancy in vacancies %}
+              <!-- vacancy -->
+              <div class="card mt-3">
+                <div class="card-body px-4">
+                  <div class="row align-items-center">
+                    <div class="col-6 col-lg-8">
+                      <a href="{% url "vacancy" vacancy_id=vacancy.id %}" class="mb-1">{{ vacancy.title }}</a>
+                      <p class="mb-1">
+                        <span class="mr-4">{{ vacancy.salary_min }} - {{ vacancy.salary_max }}</span><a href="{% url "my_company_vacancy" vacancy_id=vacancy.id %}#applications" class="text-info">3 отклика</a>
+                      </p>
+                    </div>
+                    <div class="col-6 col-lg-4 text-right">
+                      <a href="{% url "my_company_vacancy" vacancy_id=vacancy.id %}" class="btn btn-outline-info">Изменить</a>
+                    </div>
+                    
+                  </div>
+                  
+                </div>
+                
+              </div>
+              <!-- END vacancy -->
+              {% endfor %}
+              <a href="{% url "my_company_vacancies_create" %}" class="btn btn-info mb-2 mt-3">Добавить еще одну вакансию</a>
+              {% else %}
+              <div class="card-body px-3 pb-2">
+                <p class="alert alert-info" role="alert">
+                У вас пока нет вакансий, но вы можете создать первую!
+                </p>
+                <a href="{% url "my_company_vacancies_create" %}" class="btn btn-info mb-2">Добавить вакансию</a>
+              </div>
+              {% endif %}
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+ {% endblock %}
