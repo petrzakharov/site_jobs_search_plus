@@ -1,12 +1,7 @@
-from re import S
-from secrets import choice
-
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator, MinValueValidator
+from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator
 from django.db import models
-from django.forms import IntegerField
-from phone_field import PhoneField
 
 User = get_user_model()
 
@@ -49,8 +44,6 @@ class Specialty(models.Model):
     def __str__(self):
         return self.code
 
-    # Проверить что метод delete отрабатывает, при удалении экземпляра удаляется изображение
-
 
 class Vacancy(models.Model):
     title = models.CharField(max_length=100)
@@ -83,7 +76,11 @@ class Application(models.Model):
     written_username = models.CharField(
         max_length=30, help_text="Ваш юзернейм", blank=False
     )
-    written_phone = PhoneField(blank=False, help_text="Номер телефона")
+    written_phone = models.CharField(
+        null=True,
+        validators=[RegexValidator(r"^\+?1?\d{9,15}$")],
+        max_length=15,
+    )
     written_cover_letter = models.TextField(blank=False, max_length=1000)
     vacancy = models.ForeignKey(
         Vacancy, on_delete=models.CASCADE, related_name="applications"
@@ -149,16 +146,3 @@ class Resume(models.Model):
 
     def __str__(self):
         return self.name + "__" + str(self.specialty)
-
-
-# Пицца (у одной пиццы может быть много топпингов)
-# Топпинг (один топпинг может быть на многих пиццах)
-
-# Вакансия (у вакансии может быть одна компания)
-# Компания (у компании может быть много вакансий)
-
-# Оклик резюме (у отклика может быть только одна вакансия)
-# Вакансия (у ваканчии может быть много откликов)
-
-# Отклик резюме (у отклика может быть только один пользователь)
-# Юзер (у юзера может быть много откликов)

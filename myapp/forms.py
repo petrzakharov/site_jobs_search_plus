@@ -2,6 +2,7 @@ from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Column, Layout, Row, Submit
 from django import forms
+from django.urls import reverse
 
 from . import models
 
@@ -87,6 +88,12 @@ class VacancyForm(forms.ModelForm):
 
 
 class ApplicationForm(forms.ModelForm):
+    written_phone = forms.RegexField(
+        regex=r"^\+?1?\d{9,15}$",
+        help_text="Ваш номер в формате +7XXXXXXXXXX",
+        label="Ваш номер",
+    )
+
     class Meta:
         model = models.Application
         fields = (
@@ -109,4 +116,18 @@ class ApplicationForm(forms.ModelForm):
             Row(Column("written_phone", css_class="mb-1")),
             Row(Column("written_cover_letter", css_class="mb-1")),
             Submit("submit", "Отправить", css_class="btn btn-primary mt-4 mb-2"),
+        )
+
+
+class SearchForm(forms.Form):
+    search = forms.CharField(required=False, label="")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = "get"
+        self.helper.form_action = reverse("search")
+        self.helper.layout = Layout(
+            Row("search", css_clss="form-control w-100"),
+            Submit("submit", "Найти", css_class="btn btn-primary w-100"),
         )

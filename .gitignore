@@ -132,3 +132,4 @@ media/
 myapp/static/
 */static/
 .vscode/
+.vscode/settings.json

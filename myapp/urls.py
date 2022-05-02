@@ -28,7 +28,7 @@ urlpatterns = [
     ),
     path(
         "mycompany/letsstart/",
-        views.MyComapanyStart.as_view(),
+        views.MyCompanyStart.as_view(),
         name="my_company_start",
         # context ok
     ),
@@ -61,6 +61,11 @@ urlpatterns = [
         # добавить в context количество откликов через annotate
         # вывести отклики
     ),
+    path(
+        "search/",
+        views.SearchView.as_view(),
+        name="search",
+    )
     ##### вторая часть
     # path(
     #     "/myresume/letsstart/",

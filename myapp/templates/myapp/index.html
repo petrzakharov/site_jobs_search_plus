@@ -1,8 +1,38 @@
 {% extends "base.html" %}
 {% block title %} Главная | Джуманджи{% endblock %}
 {% block content %}
+{% load crispy_forms_tags %}
 <main class="container mt-3">
-{% include 'includes/search_section.html' with skills=top_5_skills %}
+{% comment %} {% include 'includes/search_section.html' with skills=top_5_skills %} {% endcomment %}
+
+
+<section>
+    <h1 class="h1 text-center mx-auto mt-4 py-5"><strong>Вакансии для <br>Junior-разработчиков</strong></h1>
+    <div class="row">
+    <div class="col-12 col-md-8 col-lg-6 offset-lg-3 offset-md-2">
+        <form action="/search/" class="form-inline mb-3" enctype="multipart/form-data" >
+        <div class="form-group col-8 col-md-10 pl-0">
+               {{ form.search|as_crispy_field }}
+        </div>
+        <div class="form-group col-4 col-md-2 pl-0">
+            <button class="btn btn-primary w-100" type="submit">Найти</button>
+        </div>
+        </form>
+        <p>Например: 
+        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Python</a> 
+        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Flask</a> 
+        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Django</a> 
+        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Парсинг</a> 
+        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">ML</a> 
+        </p>
+    </div>
+    </div>
+</section>
+
+
+
+
+
 <section class="mt-5 pt-3">
     <h2 class="h2 font-weight-normal text-center mb-5">Вакансии по рубрикам</h2>
         <div class="row mb-0">

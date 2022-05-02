@@ -1,8 +1,6 @@
-from calendar import c
-
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Count
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import View
@@ -10,7 +8,7 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView
 
 from . import models
-from .forms import ApplicationForm, CompanyForm, VacancyForm
+from .forms import ApplicationForm, CompanyForm, SearchForm, VacancyForm
 from .permissions import (
     UserMustHasCompany,
     UserMustHasNotCompany,
@@ -23,6 +21,7 @@ class Index(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["form"] = SearchForm()
         context["specialties"] = models.Specialty.objects.annotate(
             count=Count("vacancies")
         )
@@ -66,11 +65,13 @@ class Vacancy(View):
         context = {"form": form, "vacancy": vacancy}
         return render(request, "myapp/vacancy.html", context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, vacancy_id):
+        vacancy = models.Vacancy.objects.get(id=vacancy_id)
         if request.user.is_anonymous:
             return HttpResponse(status=403)
         form = ApplicationForm(request.POST)
-        # Доп можно сделать, если пользователь уже отправлял отклик, то скрыть для него форму
+        # Доп можно сделать: если пользователь уже отправлял отклик, то скрыть для него форму
+        # Если уже отправлял отклик на это резюме, то убрать форму (передать в контекст параметр) и отобразить сообщение
         if form.is_valid():
             instance = form.save(commit=False)
             instance.user = request.user
@@ -81,7 +82,7 @@ class Vacancy(View):
                     "vacancy_send", kwargs={"vacancy_id": self.kwargs["vacancy_id"]}
                 )
             )
-        return render(request, "sent.html", {"form": form})
+        return render(request, "myapp/vacancy.html", {"form": form, "vacancy": vacancy})
 
 
 class Company(ListView):
@@ -119,7 +120,7 @@ class Company(ListView):
 # Запретить доступ не к своей компании и ее вакансиям
 
 
-class MyComapanyStart(LoginRequiredMixin, UserMustHasNotCompany, View):
+class MyCompanyStart(LoginRequiredMixin, UserMustHasNotCompany, View):
     login_url = "/login/"
 
     def get(self, request, *args, **kwargs):
@@ -183,7 +184,14 @@ class MyCompanyVacanciesList(LoginRequiredMixin, UserMustHasCompany, View):
 class VacancySend(View):
     # шаблон доделать
     def get(self, request, vacancy_id):
-        return render(request, "myapp/sent.html", {"vacancy_id": vacancy_id})
+        back_url = reverse_lazy(
+            "vacancy", kwargs={"vacancy_id": self.kwargs["vacancy_id"]}
+        )
+        return render(
+            request,
+            "myapp/sent.html",
+            {"vacancy_id": vacancy_id, "back_url": back_url},
+        )
 
 
 class MyComapnyVacanciesCreate(LoginRequiredMixin, UserMustHasCompany, View):
@@ -231,3 +239,28 @@ class MyCompanyVacancy(LoginRequiredMixin, UserViewOnlyYourVacancies, View):
         else:
             context["status"] = "Обновления не сохранены. Исправьте ошибки"
         return render(request, "myapp/vacancy-edit.html", context)
+
+
+class SearchView(ListView):
+    model = models.Vacancy
+    template_name = "myapp/vacancies.html"
+    allow_empty = True
+
+    def get_queryset(self):
+        query = self.request.GET.get("search")
+        if query:
+            q = (
+                Q(title__icontains=query)
+                # | Q(skills__icontains=query)
+                # | Q(company__icontains=query)
+            )
+            # фильтрация по foreign key
+            # отфильтровать отдельно и объединить кверисеты
+            return models.Vacancy.objects.filter(q)
+        return models.Vacancy.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["status"] = "Результаты поиска"
+        # в шаблон главной страницы добавить поиск по готовым фразам Python, Django итд
+        return context

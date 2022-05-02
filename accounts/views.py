@@ -2,7 +2,6 @@ from audioop import reverse
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
@@ -23,6 +22,3 @@ class Login(LoginView):
 
 class Logout(LogoutView):
     pass
-
-
-# Почитать про CreateView
