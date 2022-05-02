@@ -131,3 +131,4 @@ myapp/media/
 media/
 myapp/static/
 */static/
+.vscode/
