@@ -13,7 +13,7 @@
       <section class="pl-3">
         <a href="{% url "company" vacancy.company.id %}"
           ><img
-            src="../static/{{ vacancy.company.logo }}"
+            src="{{ vacancy.company.logo.url }}"
             width="130"
             height="80"
             alt=""

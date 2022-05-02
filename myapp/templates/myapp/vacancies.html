@@ -26,7 +26,7 @@
           <p class="text-muted pt-1">{{ vacancy.published_at|date:"d F" }} </p>
         </div>
         <div class="col-12 col-md-4 col-lg-3 d-flex align-items-end">
-          <a href="{% url "vacancy" vacancy.id%}"><img src="../static/{{ vacancy.company.logo }}" width="130" height="80" alt=""></a>
+          <a href="{% url "vacancy" vacancy.id%}"><img src="{{ vacancy.company.logo.url }}" width="130" height="80" alt=""></a>
         </div>
       </div>
     </div>

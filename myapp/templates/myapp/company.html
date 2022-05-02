@@ -6,7 +6,7 @@
   <section>
     <div class="text-center">
       <img
-        src="../static/{{ company.logo }}"
+        src="{{ company.logo.url }}"
         width="130"
         height="80"
         alt=""
@@ -35,7 +35,7 @@
                 </p>
               </div>
               <div class="col-12 col-md-4 col-lg-3 d-flex align-items-end">
-                <a href="{% url "vacancy" vacancy.id%}"><img src="/../static/specialties/specty_{{ vacancy.specialty.code }}.png" width="130" height="80" alt=""></a>
+                <a href="{% url "vacancy" vacancy.id%}"><img src="{{ company.logo.url }}" width="130" height="80" alt=""></a>
               </div>
             </div>
           </div>

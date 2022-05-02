@@ -32,8 +32,6 @@ class Company(models.Model):
     def __str__(self):
         return self.name
 
-    # Проверить что метод delete отрабатывает, при удалении экземпляра удаляется изображение
-
 
 class Specialty(models.Model):
     code = models.CharField(max_length=30)

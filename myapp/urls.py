@@ -34,7 +34,7 @@ urlpatterns = [
     ),
     path(
         "mycompany/create/",
-        views.MyComapanyCreate.as_view(),
+        views.MyCompanyCreate.as_view(),
         name="my_company_create",  # Моя компания (пустая форма)
         # проверяем что у юзера нет компании, если есть переадресуем на mycompany,
         # если нет то возвраещем пустую форму

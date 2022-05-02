@@ -11,6 +11,11 @@ from django.views.generic.base import TemplateView
 
 from . import models
 from .forms import ApplicationForm, CompanyForm, VacancyForm
+from .permissions import (
+    UserMustHasCompany,
+    UserMustHasNotCompany,
+    UserViewOnlyYourVacancies,
+)
 
 
 class Index(TemplateView):
@@ -50,17 +55,6 @@ class VacanciesBySpecialty(ListView):
         ).select_related("company")
 
 
-# class Vacancy(DetailView):
-#     model = models.Vacancy
-#     template_name = "myapp/vacancy.html"
-#     pk_url_kwarg = "vacancy_id"
-#     context_object_name = "vacancy"
-
-# тут добавить форму отклика, если пришел post запрос то ...
-# переписать на get / post запросах
-# при post запросе создаем связь в таблице откликов и переадресуем в VacancySend
-
-
 class Vacancy(View):
     # в post нужно вызвать ошибку если юзер anonim !!!
     # вернуть 404 ошибку если страница не существует (вакансия)
@@ -73,8 +67,10 @@ class Vacancy(View):
         return render(request, "myapp/vacancy.html", context)
 
     def post(self, request, *args, **kwargs):
-        # тут нужно вызвать ошибку если юзер anonim
+        if request.user.is_anonymous:
+            return HttpResponse(status=403)
         form = ApplicationForm(request.POST)
+        # Доп можно сделать, если пользователь уже отправлял отклик, то скрыть для него форму
         if form.is_valid():
             instance = form.save(commit=False)
             instance.user = request.user
@@ -113,32 +109,28 @@ class Company(ListView):
 # MyComapnyVacanciesCreate
 # MyCompanyVacancy
 
+# Сделать кнопку назад на странице с выдачей по вакансиям
+# Прикрутить поиск в самом конце (сделать хотя бы часть сложного варианта)
 
+# (!!!) Важно
 # Проверку наличия компании можно попробовать реализовать через
 # Написать 2 своих миксина на основе PermissionRequiredMixin - что компания есть и что компании нет
 
+# Запретить доступ не к своей компании и ее вакансиям
 
-class MyComapanyStart(LoginRequiredMixin, View):
+
+class MyComapanyStart(LoginRequiredMixin, UserMustHasNotCompany, View):
     login_url = "/login/"
-    # у пользователя не должно быть компании
-    # наполить словарь контекста для шаблона
 
     def get(self, request, *args, **kwargs):
-        company_qs = models.Company.objects.filter(owner=request.user)
-        if company_qs.exists():
-            return redirect(reverse_lazy("my_company"))
         return render(request, "myapp/company-create.html", context={})
 
 
-class MyComapanyCreate(LoginRequiredMixin, View):
-
+class MyCompanyCreate(LoginRequiredMixin, UserMustHasNotCompany, View):
     login_url = "/login/"
-    # у пользователя должна не должно быть компании
     # наполить словарь контекста для шаблона
 
     def get(self, request):
-        if models.Company.objects.filter(owner=request.user).exists():
-            return redirect(reverse_lazy("my_company"))
         form = CompanyForm()
         context = {"form": form}
         return render(request, "myapp/company-edit.html", context)
@@ -154,22 +146,18 @@ class MyComapanyCreate(LoginRequiredMixin, View):
         return render(request, "myapp/company-edit.html", context)
 
 
-class MyCompany(LoginRequiredMixin, View):
+class MyCompany(LoginRequiredMixin, UserMustHasCompany, View):
     login_url = "/login/"
-    # у пользователя должна быть компания
     # наполить словарь контекста для шаблона
 
     def get(self, request):
-        # Мне нужен id company
-        company_qs = models.Company.objects.filter(owner=request.user)
-        if not company_qs.exists():
-            return redirect(reverse_lazy("my_company_start"))
-        form = CompanyForm(instance=company_qs.first())
+        company = models.Company.objects.get(owner=request.user)
+        form = CompanyForm(instance=company)
         context = {"form": form}
         return render(request, "myapp/company-edit.html", context)
 
     def post(self, request):
-        company = models.Company.objects.filter(owner=request.user).first()
+        company = models.Company.objects.get(owner=request.user)
         form = CompanyForm(request.POST, request.FILES, instance=company)
         context = {"form": form}
         if form.is_valid():
@@ -182,36 +170,27 @@ class MyCompany(LoginRequiredMixin, View):
         return render(request, "myapp/company-edit.html", context)
 
 
-class MyCompanyVacanciesList(LoginRequiredMixin, View):
+class MyCompanyVacanciesList(LoginRequiredMixin, UserMustHasCompany, View):
     login_url = "/login/"
-    # у пользователя должна быть компания
+
     # наполить словарь контекста для шаблона
     def get(self, request):
-        company_qs = models.Company.objects.filter(owner=request.user)
-        if not company_qs.exists():
-            return redirect(reverse_lazy("my_company_start"))
-        company = company_qs[0]
-        # тут оптимизировать формирование контекста
-        context = {"vacancies": company.vacancies.all()}
+        vacancies = models.Company.objects.get(owner=request.user).vacancies.all()
+        context = {"vacancies": vacancies}
         return render(request, "myapp/vacancy-list.html", context)
 
 
 class VacancySend(View):
+    # шаблон доделать
     def get(self, request, vacancy_id):
         return render(request, "myapp/sent.html", {"vacancy_id": vacancy_id})
 
-    # шаблон доделать
 
-
-class MyComapnyVacanciesCreate(LoginRequiredMixin, View):
+class MyComapnyVacanciesCreate(LoginRequiredMixin, UserMustHasCompany, View):
     login_url = "/login/"
-    # у пользователя должна быть компания
     # наполить словарь контекста для шаблона
 
     def get(self, request):
-        company_qs = models.Company.objects.filter(owner=request.user)
-        if not company_qs.exists():
-            return redirect(reverse_lazy("my_company_start"))
         form = VacancyForm()
         context = {"form": form}
         return render(request, "myapp/vacancy-edit.html", context)
@@ -229,26 +208,18 @@ class MyComapnyVacanciesCreate(LoginRequiredMixin, View):
         return render(request, "myapp/vacancy-edit.html", context)
 
 
-class MyCompanyVacancy(LoginRequiredMixin, View):
+class MyCompanyVacancy(LoginRequiredMixin, UserViewOnlyYourVacancies, View):
     login_url = "/login/"
-    # у пользователя должна быть компания
-    # пользователь должен отправлять запрос к вакансии своей компании
     # наполить словарь контекста для шаблона
 
     def get(self, request, vacancy_id):
-        # проверка что есть компания
         vacancy = get_object_or_404(models.Vacancy, id=vacancy_id)
-        if request.user != vacancy.company.owner:
-            return HttpResponse(status=403)
-        # context = {} тут добавить отклики
         form = VacancyForm(instance=vacancy)
         context = {"form": form, "vacancy": vacancy}
         return render(request, "myapp/vacancy-edit.html", context)
 
     def post(self, request, vacancy_id):
         vacancy = get_object_or_404(models.Vacancy, id=vacancy_id)
-        if request.user != vacancy.company.owner:
-            return HttpResponse(status=403)
         form = VacancyForm(request.POST, instance=vacancy)
         context = {"form": form, "vacancy": vacancy}
         # добавить в контекст отклики на форму
