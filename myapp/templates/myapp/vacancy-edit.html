@@ -3,72 +3,74 @@
 {% block content %}
 {% load crispy_forms_tags %}
 {% url 'my_company_vacancies_create' as create_url %}
- <style>
-    body {
-      background-color: #F6F2E6;
-    }
-  </style>
+<style>
+  body {
+    background-color: #F6F2E6;
+  }
+</style>
 
 
 
 
-  <main class="container mt-3 pb-5">
-    <div class="row mt-5">
-      <div class="col-12 col-lg-4">
-        <aside class="pt-3 pb-4 px-4 mb-5 card">
-          <h1 class="h4 pt-2 pb-2">Моя компания</h1>
-          <div class="nav flex-column nav-pills">
-            <a class="nav-link" href="{%url "my_company" %}">1. Информация о&nbsp;компании</a>
-            <a class="nav-link active" href="{% url "my_company_vacancies_list" %}">2. Вакансии</a>
-          </div>
-        </aside>
-      </div>
-      <div class="col-12 col-lg-8">
-        <div class="card">
-          <div class="card-body px-4 pb-4 tab-content">
-            
-            
+<main class="container mt-3 pb-5">
+  <div class="row mt-5">
+    <div class="col-12 col-lg-4">
+      <aside class="pt-3 pb-4 px-4 mb-5 card">
+        <h1 class="h4 pt-2 pb-2">Моя компания</h1>
+        <div class="nav flex-column nav-pills">
+          <a class="nav-link" href="{%url "my_company" %}">1. Информация о&nbsp;компании</a>
+          <a class="nav-link active" href="{% url "my_company_vacancies_list" %}">2. Вакансии</a>
+        </div>
+      </aside>
+    </div>
+    <div class="col-12 col-lg-8">
+      <div class="card">
+        <div class="card-body px-4 pb-4 tab-content">
 
 
-            <!-- Tab -->
-            <section>
-              <h2 class="h4 pt-2 pb-3">
-                {% if  request.path  == create_url %}
-                Создание новой вакансии
-                {% else %}
-                {{ vacancy.title }}
-                {% endif %}
-              </h2>
-              {% if status %}
-              <p class="alert alert-info" role="alert">{{ status }}</p>
+
+
+          <!-- Tab -->
+          <section>
+            <h2 class="h4 pt-2 pb-3">
+              {% if request.path == create_url %}
+              Создание новой вакансии
+              {% else %}
+              {{ vacancy.title }}
               {% endif %}
+            </h2>
+            {% if status %}
+            <p class="alert alert-info" role="alert">{{ status }}</p>
+            {% endif %}
             <!--Vacancy info -->
 
             {% crispy form %}
             <!--END Vacancy info -->
-            
+
 
             <!-- Applications -->
-            {% if  request.path  != create_url %}
+            {% if request.path != create_url %}
             страница создания вакансии, нужно поменять заголовок и отключить отклики
             страница редактирования вакансии
             <p><a name="applications"></a></p>
-              <h2 class="h4 pt-2 pb-3">Отклики - 2</h2>
-              
-              <!-- Application 1 -->
-              <div class="card mt-3">
-                <div class="card-body px-4">
-                  <p class="mb-1 font-weight-bold">Семёнов Зельфик Геннадиевич</p>
-                  <p class="mb-2"><a href="tel:+79002842324" class="text-dark">+7 (900) 284-23-24</a></p>
-                  <p class="mb-1">Я&nbsp;хотел&nbsp;бы работать в&nbsp;компании &laquo;АБВГД&raquo; программистом мобильных приложений. Мой опыт работы в&nbsp;программировании около 4&nbsp;лет (последние 1,5 года занимаюсь разработкой приложений.</p>
-                </div>
+            <h2 class="h4 pt-2 pb-3">Отклики - {{ applications.count }}</h2>
+            {% for application in applications %}
+            <!-- Application 1 -->
+            <div class="card mt-3">
+              <div class="card-body px-4">
+                <p class="mb-1 font-weight-bold">{{ application.written_username }}</p>
+                <p class="mb-2"><a href="tel:{{ application.written_phone }}" class="text-dark">{{ application.written_phone }}</a></p>
+                <p class="mb-1">{{ application.written_cover_letter }}</p>
               </div>
-              {% endif %}
+            </div>
+            {% endfor %}
 
-            </section>
-          </div>
+            {% endif %}
+
+          </section>
         </div>
       </div>
     </div>
-  </main>
+  </div>
+</main>
 {% endblock %}

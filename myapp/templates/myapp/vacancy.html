@@ -1,4 +1,4 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 {% block title %} Вакансия | Джуманджи{% endblock %}
 {% block content %}{% load humanize %}
 {% load crispy_forms_tags %}
@@ -6,18 +6,13 @@
   <div class="row mt-5">
     <div class="col-12 col-lg-2">
       <div class="pl-3 mb-5">
-        <p><a href="#">Назад</a></p>
+        <p><a href="{{request.META.HTTP_REFERER}}">Назад</a></p>
       </div>
     </div>
     <div class="col-12 col-lg-8">
       <section class="pl-3">
-        <a href="{% url "company" vacancy.company.id %}"
-          ><img
-            src="{{ vacancy.company.logo.url }}"
-            width="130"
-            height="80"
-            alt=""
-        /></a>
+        <a href="{% url "company" vacancy.company.id %}"><img src="{{ vacancy.company.logo.url }}" width="130"
+            height="80" alt="" /></a>
         <div class="d-flex align-items-baseline align-content-baseline">
           <h1 class="h2 mt-4 font-weight-bold">{{ vacancy.title }}</h1>
           <p class="m-0 pl-3">
@@ -33,11 +28,13 @@
       </section>
     </div>
   </div>
+  {% if not user_has_application %}
   <div class="card mt-4 mb-4">
-  <div class="card-body mx-4"> 
-<p class="h5 mt-3 font-weight-normal">Отозваться на вакансию</p>
-    {% crispy form %}
+    <div class="card-body mx-4">
+      <p class="h5 mt-3 font-weight-normal">Отозваться на вакансию</p>
+      {% crispy form %}
+    </div>
   </div>
-  </div> 
+  {% endif %}
 </main>
 {% endblock %}

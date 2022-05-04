@@ -129,5 +129,4 @@ class SearchForm(forms.Form):
         self.helper.form_action = reverse("search")
         self.helper.layout = Layout(
             Row("search", css_clss="form-control w-100"),
-            Submit("submit", "Найти", css_class="btn btn-primary w-100"),
         )

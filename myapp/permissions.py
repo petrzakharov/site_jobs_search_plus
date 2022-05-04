@@ -8,10 +8,15 @@ from . import models
 class UserMustHasNotCompany(UserPassesTestMixin):
     redirect_url = "my_company"
 
+    def is_anonym(self):
+        return self.request.user.is_anonymous
+
     def test_func(self):
         return not models.Company.objects.filter(owner=self.request.user).exists()
 
     def handle_no_permission(self):
+        if self.is_anonym():
+            return redirect("login")
         if self.raise_exception:
             raise PermissionDenied(self.get_permission_denied_message())
         return redirect(self.redirect_url)
@@ -20,10 +25,15 @@ class UserMustHasNotCompany(UserPassesTestMixin):
 class UserMustHasCompany(UserPassesTestMixin):
     redirect_url = "my_company_start"
 
+    def is_anonym(self):
+        return self.request.user.is_anonymous
+
     def test_func(self):
         return models.Company.objects.filter(owner=self.request.user).exists()
 
     def handle_no_permission(self):
+        if self.is_anonym():
+            return redirect("login")
         if self.raise_exception:
             raise PermissionDenied(self.get_permission_denied_message())
         return redirect(self.redirect_url)

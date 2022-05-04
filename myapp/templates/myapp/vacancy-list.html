@@ -31,7 +31,7 @@
                     <div class="col-6 col-lg-8">
                       <a href="{% url "vacancy" vacancy_id=vacancy.id %}" class="mb-1">{{ vacancy.title }}</a>
                       <p class="mb-1">
-                        <span class="mr-4">{{ vacancy.salary_min }} - {{ vacancy.salary_max }}</span><a href="{% url "my_company_vacancy" vacancy_id=vacancy.id %}#applications" class="text-info">3 отклика</a>
+                        <span class="mr-4">{{ vacancy.salary_min }} - {{ vacancy.salary_max }}</span><a href="{% url "my_company_vacancy" vacancy_id=vacancy.id %}#applications" class="text-info">{{ vacancy.count_application }} откликов</a>
                       </p>
                     </div>
                     <div class="col-6 col-lg-4 text-right">

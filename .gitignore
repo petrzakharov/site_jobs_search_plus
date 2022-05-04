@@ -133,3 +133,4 @@ myapp/static/
 */static/
 .vscode/
 .vscode/settings.json
+static_root

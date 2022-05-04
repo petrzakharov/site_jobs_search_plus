@@ -3,9 +3,6 @@
 {% block content %}
 {% load crispy_forms_tags %}
 <main class="container mt-3">
-{% comment %} {% include 'includes/search_section.html' with skills=top_5_skills %} {% endcomment %}
-
-
 <section>
     <h1 class="h1 text-center mx-auto mt-4 py-5"><strong>Вакансии для <br>Junior-разработчиков</strong></h1>
     <div class="row">
@@ -19,18 +16,13 @@
         </div>
         </form>
         <p>Например: 
-        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Python</a> 
-        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Flask</a> 
-        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Django</a> 
-        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">Парсинг</a> 
-        <a href="#" class="text-dark border-bottom border-dark m-1 text-decoration-none">ML</a> 
+        {% for hint in hints %}
+        <a href="{% url 'search' %}?search={{ hint }}" class="text-dark border-bottom border-dark m-1 text-decoration-none">{{ hint }}</a>
+        {% endfor %}
         </p>
     </div>
     </div>
 </section>
-
-
-
 
 
 <section class="mt-5 pt-3">

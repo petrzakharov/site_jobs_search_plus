@@ -9,7 +9,11 @@
 {% if all_vacancie %}
 Все вакансии
 {% else %}
-{{ object_list.0.specialty.title }}
+  {% if status %}
+  {{ status }}
+  {% else %}
+  {{ object_list.0.specialty.title }}
+  {% endif %}
 {% endif %}
 </strong></h1>
 <p class="text-center pt-1">{{ object_list.count }} вакансий</p>
