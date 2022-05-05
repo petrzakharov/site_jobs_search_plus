@@ -2,7 +2,6 @@ from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Column, Layout, Row, Submit
 from django import forms
-from django.urls import reverse
 
 from . import models
 
@@ -119,14 +118,71 @@ class ApplicationForm(forms.ModelForm):
         )
 
 
-class SearchForm(forms.Form):
-    search = forms.CharField(required=False, label="")
+# class SearchForm(forms.Form):
+#     search = forms.CharField(required=False, label="")
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.helper = FormHelper()
+#         self.helper.form_method = "get"
+#         self.helper.form_action = reverse("search")
+#         self.helper.layout = Layout(
+#             Row("search", css_clss="form-control w-100"),
+#         )
+
+
+class ResumeForm(forms.ModelForm):
+    class Meta:
+        model = models.Resume
+        fields = (
+            "name",
+            "surname",
+            "status",
+            "salary",
+            "specialty",
+            "grade",
+            "education",
+            "experience",
+            "portfolio",
+        )
+
+        labels = {
+            "name": "Имя",
+            "surname": "Фамилия",
+            "status": "Готовность к работе",
+            "salary": "Ожидаемое вознаграждение",
+            "specialty": "Специализация",
+            "grade": "Квалификация",
+            "education": "Образование",
+            "experience": "Опыт работы",
+            "portfolio": "Ссылка на портфолио",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_method = "get"
-        self.helper.form_action = reverse("search")
+        self.helper.form_method = "post"
         self.helper.layout = Layout(
-            Row("search", css_clss="form-control w-100"),
+            Row(
+                Column("name"),
+                Column("surname"),
+            ),
+            Row(
+                Column("status"),
+                Column("salary"),
+            ),
+            Row(
+                Column("specialty"),
+                Column("grade"),
+            ),
+            Row(
+                Column("education"),
+            ),
+            Row(
+                Column("experience"),
+            ),
+            Row(
+                Column("portfolio"),
+            ),
+            Submit("submit", "Сохранить", css_class="btn btn-info"),
         )

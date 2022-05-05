@@ -35,7 +35,7 @@ urlpatterns = [
     ),
     path(
         "mycompany/vacancies/create/",
-        views.MyComapnyVacanciesCreate.as_view(),
+        views.MyCompanyVacanciesCreate.as_view(),
         name="my_company_vacancies_create",
     ),
     path(
@@ -47,19 +47,16 @@ urlpatterns = [
         "search/",
         views.SearchView.as_view(),
         name="search",
-    )
-    ##### вторая часть
-    # path(
-    #     "/myresume/letsstart/",
-    #     views.LetsCreateResume.as_view(),
-    #     name="lets_create_resume",  # Резюме не создано - предложение создать
-    # ),
-    # path(
-    #     "/myresume/create/",
-    #     views.MyResumeCreate.as_view(),
-    #     name="my_resume_create",  # Создание резюме (пустая форма)
-    # ),
-    # path(
-    #     "/myresume/", views.MyResume.as_view(), name="my_resume"
-    # ),  # Мое резюме (заполненная форма)
+    ),
+    path(
+        "myresume/letsstart/",
+        views.LetsCreateResume.as_view(),
+        name="lets_create_resume",
+    ),
+    path(
+        "myresume/create/",
+        views.MyResumeCreate.as_view(),
+        name="my_resume_create",
+    ),
+    path("myresume/", views.MyResume.as_view(), name="my_resume"),
 ]

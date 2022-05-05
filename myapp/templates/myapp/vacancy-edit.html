@@ -50,8 +50,6 @@
 
             <!-- Applications -->
             {% if request.path != create_url %}
-            страница создания вакансии, нужно поменять заголовок и отключить отклики
-            страница редактирования вакансии
             <p><a name="applications"></a></p>
             <h2 class="h4 pt-2 pb-3">Отклики - {{ applications.count }}</h2>
             {% for application in applications %}

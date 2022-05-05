@@ -1,6 +1,6 @@
 {
     "editor.rulers": [
-        80
+        120
     ],
     "html.suggest.html5": true,
     "python.linting.flake8Enabled": true,
@@ -19,5 +19,5 @@
     "editor.fontLigatures": true,
     "editor.letterSpacing": 0.4,
     "editor.smoothScrolling": true,
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "autopep8",
 }

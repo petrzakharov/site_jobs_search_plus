@@ -1,27 +1,29 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import DetailView, ListView, UpdateView
+from django.views.generic import CreateView, ListView, UpdateView
 from django.views.generic.base import TemplateView
 
 from . import models
-from .forms import ApplicationForm, CompanyForm, SearchForm, VacancyForm
-from .permissions import (
-    UserMustHasCompany,
-    UserMustHasNotCompany,
-    UserViewOnlyYourVacancies,
-)
+from .forms import ApplicationForm, CompanyForm, ResumeForm, VacancyForm
+from .permissions import (UserMustHasCompany, UserMustHasNotCompany,
+                          UserMustHasNotResume, UserMustHasResume,
+                          UserViewOnlyYourVacancies)
 
 
 class Index(TemplateView):
+    """
+    Главная страница
+    """
+
     template_name = "myapp/index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["form"] = SearchForm()
         context["specialties"] = models.Specialty.objects.annotate(
             count=Count("vacancies")
         )
@@ -33,6 +35,10 @@ class Index(TemplateView):
 
 
 class VacanciesList(ListView):
+    """
+    Список всех вакансий
+    """
+
     model = models.Vacancy
     template_name = "myapp/vacancies.html"
 
@@ -46,6 +52,10 @@ class VacanciesList(ListView):
 
 
 class VacanciesBySpecialty(ListView):
+    """
+    Список вакансий по специальностям
+    """
+
     template_name = "myapp/vacancies.html"
     allow_empty = False
 
@@ -56,12 +66,18 @@ class VacanciesBySpecialty(ListView):
 
 
 class Vacancy(View):
+    """
+    Отображение вакансии и формы отклика
+    """
+
     def get(self, request, vacancy_id):
         form = ApplicationForm()
         vacancy = get_object_or_404(models.Vacancy, id=vacancy_id)
-        user_has_application = models.Application.objects.filter(
-            user=self.request.user, vacancy=vacancy
-        ).exists()
+        user_has_application = False
+        if not request.user.is_anonymous:
+            user_has_application = models.Application.objects.filter(
+                user=self.request.user, vacancy=vacancy
+            ).exists()
         context = {
             "form": form,
             "vacancy": vacancy,
@@ -88,6 +104,10 @@ class Vacancy(View):
 
 
 class Company(ListView):
+    """
+    Информация о компании
+    """
+
     model = models.Vacancy
     template_name = "myapp/company.html"
     pk_url_kwarg = "company_id"
@@ -105,45 +125,38 @@ class Company(ListView):
         ).select_related("company")
 
 
-class VacancySend(View):
-    # ВСЕ ОК, кроме не грузящейся зеленой галочки
+class VacancySend(LoginRequiredMixin, TemplateView):
     """
-    Отправка отклика на вакансию
-    """
-
-    def get(self, request, vacancy_id):
-        back_url = reverse_lazy(
-            "vacancy", kwargs={"vacancy_id": self.kwargs["vacancy_id"]}
-        )
-        return render(
-            request,
-            "myapp/sent.html",
-            {
-                "vacancy_id": vacancy_id,
-                "back_url": back_url,
-            },
-        )
-
-
-class MyCompanyStart(LoginRequiredMixin, UserMustHasNotCompany, View):
-    """
-    Предложение создать компанию
+    Страница успешной отправки отклика
     """
 
-    # ВСЕ ОК
+    template_name = "myapp/sent.html"
     login_url = "/login/"
 
-    def get(self, request, *args, **kwargs):
-        return render(request, "myapp/company-create.html")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        vacancy_id = self.kwargs["vacancy_id"]
+        back_url = reverse_lazy("vacancy", kwargs={"vacancy_id": vacancy_id})
+        context = {"vacancy_id": vacancy_id, "back_url": back_url}
+        return context
+
+
+class MyCompanyStart(LoginRequiredMixin, UserMustHasNotCompany, TemplateView):
+    """
+    Предложение создать компанию/переадресация на существующую
+    """
+
+    login_url = "/login/"
+    template_name = "myapp/company-create.html"
 
 
 class MyCompanyCreate(LoginRequiredMixin, UserMustHasNotCompany, View):
     """
-    Создание компании
+    Создание компании, view
     """
 
     login_url = "/login/"
-    # ВСЕ ОК, можно переписать на дженерике
+
     def get(self, request):
         form = CompanyForm()
         context = {"form": form}
@@ -160,70 +173,39 @@ class MyCompanyCreate(LoginRequiredMixin, UserMustHasNotCompany, View):
         return render(request, "myapp/company-edit.html", context)
 
 
-class MyCompany(LoginRequiredMixin, UserMustHasCompany, View):
+class MyCompany(
+    LoginRequiredMixin, UserMustHasCompany, SuccessMessageMixin, UpdateView
+):
     """
-    Отображени/редактирование существующей компании
+    Редакирование данных о компании, generic
     """
 
-    login_url = "/login/"
-    # ВСЕ ОК, но можно переписать на дженериках и добавить отображение логотипа
-    # Статус обновления не сохранены можно убрать если перепишу на дженериках, форма и так говорит про ошибки
-    def get(self, request):
-        company = models.Company.objects.get(owner=request.user)
-        form = CompanyForm(instance=company)
-        context = {"form": form}
-        return render(request, "myapp/company-edit.html", context)
+    model = models.Company
+    template_name = "myapp/company-edit.html"
+    form_class = CompanyForm
+    success_url = reverse_lazy("my_company")
+    success_message = "Изменения успешно сохранены"
 
-    def post(self, request):
-        company = models.Company.objects.get(owner=request.user)
-        form = CompanyForm(request.POST, request.FILES, instance=company)
-        context = {"form": form}
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.owner = request.user
-            instance.save()
-            context["status"] = "Информация о компании обновлена"
-        else:
-            context["status"] = "Обновления не сохранены. Исправьте ошибки"
-        return render(request, "myapp/company-edit.html", context)
+    def get_object(self):
+        return models.Company.objects.get(owner=self.request.user)
 
 
-# class MyCompany(LoginRequiredMixin, UserMustHasCompany, UpdateView):
-#     model = models.Company
-#     template_name = "myapp/company-edit.html"
-#     form_class = CompanyForm
-#     success_url = reverse_lazy("my_company")
-
-#     # не могу сформировать обновление статуса, непонятно как проверить что формы была правильно сохранена
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         return context
-
-#     def form_valid(self, form, **kwargs):
-#         self.object = form.save(commit=False)
-#         self.object.owner = self.request.user
-#         self.object.save()
-#         return super().form_valid(form)
-
-#     def get_object(self):
-#         return models.Company.objects.get(owner=self.request.user)
-
-
-class MyCompanyVacanciesList(LoginRequiredMixin, UserMustHasCompany, View):
+class MyCompanyVacanciesList(LoginRequiredMixin, UserMustHasCompany, TemplateView):
     """
     Список сохраненных вакансий владельца компании
     """
 
     login_url = "/login/"
-    # ВСЕ ОК
-    def get(self, request):
-        company = models.Company.objects.get(owner=request.user)
+    template_name = "myapp/vacancy-list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        company = models.Company.objects.get(owner=self.request.user)
         vacancies = models.Vacancy.objects.filter(company=company).annotate(
             count_application=Count("applications")
         )
         context = {"vacancies": vacancies}
-        return render(request, "myapp/vacancy-list.html", context)
+        return context
 
 
 class MyCompanyVacancy(LoginRequiredMixin, UserViewOnlyYourVacancies, View):
@@ -232,7 +214,6 @@ class MyCompanyVacancy(LoginRequiredMixin, UserViewOnlyYourVacancies, View):
     """
 
     login_url = "/login/"
-    # ВСЕ ОК, но можно переписать на дженерики
 
     def get(self, request, vacancy_id):
         vacancy = get_object_or_404(models.Vacancy, id=vacancy_id)
@@ -255,34 +236,29 @@ class MyCompanyVacancy(LoginRequiredMixin, UserViewOnlyYourVacancies, View):
         return render(request, "myapp/vacancy-edit.html", context)
 
 
-class MyComapnyVacanciesCreate(LoginRequiredMixin, UserMustHasCompany, View):
+class MyCompanyVacanciesCreate(LoginRequiredMixin, UserMustHasCompany, CreateView):
     """
-    Создание новой вакансии
+    Создание вакансии
     """
 
-    login_url = "/login/"
-    # ВСЕ ОК, но можно переписать на дженерики
+    template_name = "myapp/vacancy-edit.html"
+    form_class = VacancyForm
 
-    def get(self, request):
-        form = VacancyForm()
-        context = {"form": form}
-        return render(request, "myapp/vacancy-edit.html", context)
+    def form_valid(self, form, **kwargs):
+        self.object = form.save(commit=False)
+        self.object.company = self.request.user.company
+        self.object.save()
+        return super().form_valid(form)
 
-    def post(self, request):
-        form = VacancyForm(request.POST)
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.company = request.user.company
-            instance.save()
-            return redirect(
-                reverse_lazy("my_company_vacancy", kwargs={"vacancy_id": instance.id})
-            )
-        context = {"form": form, "status": "Исправьте ошибки в форме"}
-        return render(request, "myapp/vacancy-edit.html", context)
+    def get_success_url(self):
+        return reverse_lazy("my_company_vacancy", kwargs={"vacancy_id": self.object.id})
 
 
 class SearchView(ListView):
-    # ВСЕ ОК
+    """
+    Поиск на главной странице
+    """
+
     model = models.Vacancy
     template_name = "myapp/vacancies.html"
     allow_empty = True
@@ -303,3 +279,34 @@ class SearchView(ListView):
         context = super().get_context_data(**kwargs)
         context["status"] = "Результаты поиска"
         return context
+
+
+class LetsCreateResume(LoginRequiredMixin, UserMustHasNotResume, TemplateView):
+    login_url = "/login/"
+    template_name = "myapp/resume-create.html"
+
+
+class MyResumeCreate(LoginRequiredMixin, UserMustHasNotResume, CreateView):
+    login_url = "/login/"
+    template_name = "myapp/resume-edit.html"
+    form_class = ResumeForm
+
+    def form_valid(self, form, **kwargs):
+        self.object = form.save(commit=False)
+        self.object.user = self.request.user
+        self.object.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("my_resume")
+
+
+class MyResume(LoginRequiredMixin, UserMustHasResume, SuccessMessageMixin, UpdateView):
+    login_url = "/login/"
+    template_name = "myapp/resume-edit.html"
+    form_class = ResumeForm
+    success_url = reverse_lazy("my_resume")
+    success_message = "Ваше резюме обновлено!"
+
+    def get_object(self):
+        return models.Resume.objects.get(user=self.request.user)

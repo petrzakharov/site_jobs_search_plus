@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %} Моя компания | Джуманджи{% endblock %}
+{% block content %}
+{% load crispy_forms_tags %}
+<style>
+  body {
+    background-color: #F6F2E6;
+  }
+</style>
+<main class="container">
+  <div class="row mt-5">
+    <div class="col-12 col-lg-8">
+      <div class="card">
+        <div class="card-body px-4 pb-4">
+          <!-- Tab -->
+          <section class="tab-pane fade show active">
+            <h2 class="h4 pt-2 pb-3">Мое резюме</h2>
+            {% if messages %}
+            {% for message in messages %}
+            <p class="alert alert-info" role="alert">
+              {{ message|safe }}
+            </p>
+            {% endfor %}
+            {% endif %}
+            {% crispy form %}
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

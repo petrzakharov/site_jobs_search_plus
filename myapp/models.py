@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator, MinValueValidator, RegexValidator
+from django.core.validators import (MinLengthValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 User = get_user_model()
@@ -14,7 +15,9 @@ class Company(models.Model):
     employee_count = models.PositiveIntegerField(
         validators=[MinValueValidator(1)], blank=False
     )
-    owner = models.OneToOneField(User, related_name="company", on_delete=models.CASCADE)
+    owner = models.OneToOneField(
+        User, related_name="company", on_delete=models.CASCADE
+    )
 
     def delete(self, *args, **kwargs):
         self.logo.storage.delete(self.avatar.path)
@@ -137,7 +140,7 @@ class Resume(models.Model):
     )
     grade = models.CharField(choices=GradeChoices.choices, max_length=25)
     education = models.CharField(choices=EducationChoices.choices, max_length=25)
-    experience = models.PositiveBigIntegerField(blank=False)
+    experience = models.TextField(max_length=1000)
     portfolio = models.URLField(blank=True)
 
     class Meta:

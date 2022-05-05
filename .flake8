@@ -13,4 +13,7 @@ exclude =
     */admin.py,
 per-file-ignores =
     */settings.py:E501
-max-complexity = 10
+max_line_length = 120
+max-cognitive-complexity = 5
+max-complexity = 5
+ignore-django-orm-queries-complexity=true

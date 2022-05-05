@@ -18,16 +18,19 @@
           </div>
         </aside>
       </div>
+
       <div class="col-12 col-lg-8">
         <div class="card">
           <div class="card-body px-4 pb-4">
             <!-- Tab -->
             <section class="tab-pane fade show active">
                <h2 class="h4 pt-2 pb-3">Информация о&nbsp;компании</h2>
-              {% if status %}
+              {% if messages %}
+              {% for message in messages %}
               <p class="alert alert-info" role="alert">
-                {{ status}}
+                {{ message|safe }}
               </p>
+              {% endfor %}
               {% endif %}
             {% crispy form %}
           </section>
